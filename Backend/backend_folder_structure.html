@@ -1,0 +1,183 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-mono,monospace)}
+.tree{padding:16px 0;font-size:13px;line-height:1.7;color:var(--color-text-primary)}
+.row{display:flex;align-items:center;gap:6px;padding:1px 0;cursor:pointer;border-radius:4px;padding-left:4px;padding-right:8px}
+.row:hover{background:var(--color-background-secondary)}
+.indent{display:inline-block;width:18px;flex-shrink:0}
+.icon{flex-shrink:0;width:14px;height:14px;display:flex;align-items:center;justify-content:center}
+.icon svg{width:12px;height:12px}
+.label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:10px;padding:1px 6px;border-radius:10px;flex-shrink:0;font-family:var(--font-sans);opacity:.8}
+.dir > .label{color:var(--color-text-primary);font-weight:500}
+.file > .label{color:var(--color-text-secondary)}
+.phase-1 .badge{background:var(--color-background-info);color:var(--color-text-info)}
+.phase-2 .badge{background:#EEEDFE;color:#534AB7}
+.phase-3 .badge{background:#FAECE7;color:#993C1D}
+.phase-4 .badge{background:#FAEEDA;color:#854F0B}
+.collapsed > .children{display:none}
+.toggle{font-size:9px;width:12px;text-align:center;color:var(--color-text-tertiary);flex-shrink:0;transition:transform .15s}
+.collapsed .toggle{transform:rotate(-90deg)}
+.section-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;padding:10px 4px 2px;font-family:var(--font-sans)}
+</style>
+
+<div class="tree" id="tree"></div>
+
+<script>
+const DIR = 'dir', FILE = 'file';
+const P1='phase-1', P2='phase-2', P3='phase-3', P4='phase-4';
+
+const tree = [
+  {t:DIR, n:'disaster-relief-backend/', open:true, children:[
+
+    {t:FILE, n:'main.py', note:'FastAPI app entry'},
+    {t:FILE, n:'requirements.txt'},
+    {t:FILE, n:'.env.example'},
+    {t:FILE, n:'README.md'},
+    {t:FILE, n:'alembic.ini', note:'DB migrations config'},
+
+    {t:DIR, n:'app/', open:true, children:[
+
+      {t:FILE, n:'__init__.py'},
+
+      {t:DIR, n:'api/', open:true, children:[
+        {t:FILE, n:'__init__.py'},
+        {t:DIR, n:'v1/', open:true, children:[
+          {t:FILE, n:'__init__.py'},
+          {t:FILE, n:'ingest.py', phase:P1, note:'POST /ingest'},
+          {t:FILE, n:'needs.py', phase:P1, note:'GET /needs'},
+          {t:FILE, n:'volunteers.py', phase:P1, note:'GET /volunteers, CRUD'},
+          {t:FILE, n:'match.py', phase:P2, note:'POST /match'},
+          {t:FILE, n:'tasks.py', phase:P3, note:'PATCH /tasks/{id}/status'},
+          {t:FILE, n:'auth.py', phase:P3, note:'JWT login/refresh'},
+        ]},
+      ]},
+
+      {t:DIR, n:'core/', open:true, children:[
+        {t:FILE, n:'config.py', note:'Settings, env vars'},
+        {t:FILE, n:'security.py', phase:P3, note:'JWT encode/decode'},
+        {t:FILE, n:'rate_limit.py', phase:P3, note:'Rate limiting middleware'},
+        {t:FILE, n:'rbac.py', phase:P3, note:'Role-based access'},
+        {t:FILE, n:'audit.py', phase:P3, note:'Write-on-every-action'},
+        {t:FILE, n:'database.py', note:'SQLAlchemy session'},
+      ]},
+
+      {t:DIR, n:'models/', open:true, children:[
+        {t:FILE, n:'__init__.py'},
+        {t:FILE, n:'need.py', phase:P1, note:'needs table'},
+        {t:FILE, n:'volunteer.py', phase:P1, note:'volunteers table'},
+        {t:FILE, n:'assignment.py', phase:P1, note:'assignments table'},
+        {t:FILE, n:'zone.py', phase:P1, note:'zones table'},
+        {t:FILE, n:'audit_log.py', phase:P3, note:'audit_log table'},
+      ]},
+
+      {t:DIR, n:'schemas/', open:true, children:[
+        {t:FILE, n:'__init__.py'},
+        {t:FILE, n:'need.py', note:'Pydantic request/response'},
+        {t:FILE, n:'volunteer.py'},
+        {t:FILE, n:'assignment.py'},
+        {t:FILE, n:'auth.py', phase:P3},
+      ]},
+
+      {t:DIR, n:'services/', open:true, children:[
+        {t:FILE, n:'__init__.py'},
+        {t:FILE, n:'ingestion.py', phase:P1, note:'Parse + dedup via pgvector'},
+        {t:FILE, n:'matching.py', phase:P2, note:'Weight matrix + scipy solver'},
+        {t:FILE, n:'dispatch.py', phase:P3, note:'WhatsApp/SMS notify'},
+        {t:FILE, n:'volunteer.py', phase:P2, note:'Profile CRUD + rematch'},
+      ]},
+
+      {t:DIR, n:'integrations/', open:false, children:[
+        {t:FILE, n:'__init__.py'},
+        {t:FILE, n:'twilio.py', phase:P1, note:'SMS send/receive'},
+        {t:FILE, n:'whatsapp.py', phase:P1, note:'Webhook + sig verify'},
+      ]},
+
+      {t:DIR, n:'middleware/', open:false, children:[
+        {t:FILE, n:'__init__.py'},
+        {t:FILE, n:'auth_middleware.py', phase:P3},
+        {t:FILE, n:'rate_limit_middleware.py', phase:P3},
+        {t:FILE, n:'audit_middleware.py', phase:P3},
+      ]},
+
+    ]},
+
+    {t:DIR, n:'migrations/', open:false, children:[
+      {t:FILE, n:'env.py'},
+      {t:DIR, n:'versions/', open:false, children:[
+        {t:FILE, n:'001_initial_schema.py', phase:P1},
+        {t:FILE, n:'002_pgvector_extension.py', phase:P1},
+        {t:FILE, n:'003_audit_log.py', phase:P3},
+      ]},
+    ]},
+
+    {t:DIR, n:'seed/', open:false, children:[
+      {t:FILE, n:'seed_base.py', phase:P1, note:'50 needs + 30 volunteers'},
+      {t:FILE, n:'seed_demo.py', phase:P4, note:'3 demo scenarios'},
+      {t:FILE, n:'zones.py', phase:P1, note:'6 zone fixtures'},
+    ]},
+
+    {t:DIR, n:'tests/', open:false, children:[
+      {t:FILE, n:'conftest.py'},
+      {t:FILE, n:'test_ingest.py', phase:P1},
+      {t:FILE, n:'test_matching.py', phase:P2},
+      {t:FILE, n:'test_dispatch.py', phase:P3},
+      {t:FILE, n:'test_auth.py', phase:P3},
+      {t:FILE, n:'test_stress.py', phase:P4, note:'50 concurrent needs'},
+    ]},
+
+    {t:DIR, n:'docs/', open:false, children:[
+      {t:FILE, n:'openapi.yaml', phase:P4, note:'Frontend handoff'},
+      {t:FILE, n:'postman_collection.json', phase:P4},
+    ]},
+
+  ]},
+];
+
+const phaseColors = {[P1]:'P1',[P2]:'P2',[P3]:'P3',[P4]:'P4'};
+
+function folderIcon(open){
+  return `<svg viewBox="0 0 12 12" fill="none"><path d="M1 3.5C1 2.67 1.67 2 2.5 2H4.8l.7.8H9.5C10.33 2.8 11 3.47 11 4.3V8.5C11 9.33 10.33 10 9.5 10h-7C1.67 10 1 9.33 1 8.5V3.5Z" fill="var(--color-text-tertiary)" opacity=".5"/></svg>`;
+}
+function fileIcon(){
+  return `<svg viewBox="0 0 12 12" fill="none"><path d="M2.5 1h5l2.5 2.5V11H2.5V1Z" stroke="var(--color-text-tertiary)" stroke-width=".8" fill="none"/><path d="M7.5 1v2.5H10" stroke="var(--color-text-tertiary)" stroke-width=".8" fill="none"/></svg>`;
+}
+
+function render(nodes, depth=0){
+  return nodes.map(n => {
+    const indent = Array(depth).fill('<span class="indent"></span>').join('');
+    if(n.t === DIR){
+      const id = 'n'+Math.random().toString(36).slice(2);
+      const cls = n.open ? 'dir row' : 'dir row';
+      const wrapCls = n.open ? 'dir-wrap' : 'dir-wrap collapsed';
+      const children = n.children ? render(n.children, depth+1) : '';
+      return `<div class="${wrapCls}" id="${id}">
+        <div class="${cls}" onclick="toggle('${id}')">
+          ${indent}
+          <span class="toggle">&#9660;</span>
+          <span class="icon">${folderIcon(n.open)}</span>
+          <span class="label dir">${n.n}</span>
+        </div>
+        <div class="children">${children}</div>
+      </div>`;
+    } else {
+      const badge = n.phase ? `<span class="badge ${n.phase}">${phaseColors[n.phase]}</span>` : '';
+      const title = n.note ? ` title="${n.note}"` : '';
+      return `<div class="file row"${title}>
+        ${indent}
+        <span class="toggle" style="opacity:0">&#9660;</span>
+        <span class="icon">${fileIcon()}</span>
+        <span class="label">${n.n}</span>
+        ${badge}
+      </div>`;
+    }
+  }).join('');
+}
+
+document.getElementById('tree').innerHTML = render(tree);
+
+function toggle(id){
+  document.getElementById(id).classList.toggle('collapsed');
+}
+</script>
