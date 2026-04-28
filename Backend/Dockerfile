@@ -10,11 +10,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy and install Python dependencies into a clean prefix
+# Create a virtual environment
+RUN python -m venv /opt/venv
+
+# Activate the virtual environment
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy and install Python dependencies into the venv
 COPY requirements.txt requirements.docker.txt ./
-# FIX APPLIED HERE: Added --ignore-installed
 RUN pip install --upgrade pip "setuptools<70.0.0" wheel \
-    && pip install --prefix=/install --ignore-installed --no-cache-dir -r requirements.docker.txt
+    && pip install --no-cache-dir -r requirements.docker.txt
+
+# Download spaCy model directly into the venv during the build stage
+RUN python -m spacy download en_core_web_sm
 
 
 # ─── Stage 2: Runtime ────────────────────────────────────────────────────────
@@ -28,14 +36,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy installed packages from builder
-COPY --from=builder /install /usr/local
+# Copy the entire configured venv from the builder
+COPY --from=builder /opt/venv /opt/venv
+
+# Activate the venv in the runtime container
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application source
 COPY . .
-
-# Download spaCy model (must be done before switching to non-root user)
-RUN python -m spacy download en_core_web_sm
 
 # Railway injects PORT at runtime; default 8000 for local docker run
 ENV PORT=8000
