@@ -1,5 +1,5 @@
 # ─── Web Framework ───────────────────────────────────────────
-fastapi==0.111.0
+fastapi==0.110.3
 uvicorn[standard]==0.29.0
 
 # ─── Database ────────────────────────────────────────────────
@@ -39,3 +39,5 @@ pytesseract==0.3.10
 Pillow==10.3.0
 pandas==2.2.2
 prophet==1.1.5
+torch==2.3.1+cpu
+openai-whisper==20231117
