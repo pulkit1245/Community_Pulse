@@ -1,0 +1,48 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Virtual environment (deps installed inside image via requirements.txt)
+venv/
+.venv/
+env/
+
+# Environment files (injected by Railway — never bake secrets into image)
+.env
+.env.*
+!.env.example
+
+# Tests and dev tools
+tests/
+.pytest_cache/
+pytest.ini
+.coverage
+htmlcov/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Docs and reports (not needed in runtime image)
+docs/
+*.md
+*.docx
+*.svg
+*.html
+
+# Seed scripts (not needed in production image)
+seed/
+
+# Alembic pycache
+migrations/__pycache__/
+migrations/versions/__pycache__/

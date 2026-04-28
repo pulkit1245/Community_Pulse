@@ -8,7 +8,12 @@ class Settings(BaseSettings):
     app_env: str = "development"
     debug: bool = True
 
+    # Server — Railway injects $PORT automatically
+    port: int = 8000
+
     # Database
+    # Railway provides DATABASE_URL automatically when you attach a Postgres service.
+    # asyncpg driver requires the postgresql+asyncpg:// scheme.
     database_url: str = "postgresql+asyncpg://postgres:password@localhost:5432/disaster_relief"
     sync_database_url: str = "postgresql://postgres:password@localhost:5432/disaster_relief"
 
@@ -27,9 +32,14 @@ class Settings(BaseSettings):
     # Rate Limiting
     rate_limit_per_minute: int = 60
 
+    @property
+    def is_production(self) -> bool:
+        return self.app_env == "production"
+
     class Config:
         env_file = ".env"
         case_sensitive = False
+        extra = "ignore"  # Ignore unknown Railway-injected env vars
 
 
 @lru_cache()
