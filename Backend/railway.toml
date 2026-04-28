@@ -5,7 +5,7 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 # Railway injects $PORT — uvicorn binds to it. Wrapped in bash -c to ensure $PORT is evaluated as an env var.
-startCommand = "bash -c 'alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT --workers 2 --log-level info'"
+startCommand = "bash -c 'alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1 --log-level info'"
 
 # Health check — Railway polls this to know the app is ready
 healthcheckPath = "/health"
