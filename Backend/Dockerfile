@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy and install Python dependencies into a clean prefix
 COPY requirements.txt .
-RUN pip install --upgrade pip \
+RUN pip install --upgrade pip setuptools wheel \
     && pip install --prefix=/install --no-cache-dir -r requirements.txt
 
 
