@@ -4,12 +4,15 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
+# Run migrations before the app starts (separate container)
+preDeployCommand = "alembic upgrade head"
+
 # Railway injects $PORT — uvicorn binds to it
-startCommand = "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT --workers 2 --log-level info"
+startCommand = "uvicorn main:app --host 0.0.0.0 --port $PORT --workers 2 --log-level info"
 
 # Health check — Railway polls this to know the app is ready
 healthcheckPath = "/health"
-healthcheckTimeout = 30
+healthcheckTimeout = 120
 
 # Restart automatically on crash
 restartPolicyType = "ON_FAILURE"
