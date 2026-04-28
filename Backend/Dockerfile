@@ -54,14 +54,15 @@ ENV PYTHONDONTWRITEBYTECODE=1
 RUN useradd -m -u 1001 appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Health check — Railway uses /health
-HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+# Health check — Increased start-period to 60s to allow NLP model and DB to load
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${PORT}/health')" || exit 1
 
 # Start: run migrations first, then start the API server
+# Reduced to 1 worker to prevent database deadlocks during initialization
 CMD alembic upgrade head && \
     uvicorn main:app \
       --host 0.0.0.0 \
       --port $PORT \
-      --workers 2 \
+      --workers 1 \
       --log-level info
