@@ -12,8 +12,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy and install Python dependencies into a clean prefix
 COPY requirements.txt requirements.docker.txt ./
+# FIX APPLIED HERE: Added --ignore-installed
 RUN pip install --upgrade pip "setuptools<70.0.0" wheel \
-    && pip install --prefix=/install --no-cache-dir -r requirements.docker.txt
+    && pip install --prefix=/install --ignore-installed --no-cache-dir -r requirements.docker.txt
 
 
 # ─── Stage 2: Runtime ────────────────────────────────────────────────────────
