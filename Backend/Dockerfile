@@ -21,9 +21,11 @@ FROM python:3.12-slim AS runtime
 
 WORKDIR /app
 
-# Runtime system deps only (libpq for asyncpg/psycopg2)
+# Runtime system deps (libpq for asyncpg, tesseract for OCR, ffmpeg for Whisper audio)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
+    tesseract-ocr \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy installed packages from builder
@@ -31,6 +33,9 @@ COPY --from=builder /install /usr/local
 
 # Copy application source
 COPY . .
+
+# Download spaCy model (must be done before switching to non-root user)
+RUN python -m spacy download en_core_web_sm
 
 # Railway injects PORT at runtime; default 8000 for local docker run
 ENV PORT=8000
