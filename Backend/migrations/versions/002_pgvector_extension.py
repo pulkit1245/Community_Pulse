@@ -13,20 +13,23 @@ depends_on = None
 
 
 def upgrade():
-    # pgvector is required in production.
-    # In local dev without the extension installed, this migration is skipped gracefully.
     conn = op.get_bind()
-    try:
+    # Check if pgvector extension is available before attempting to use it
+    result = conn.execute(sa.text(
+        "SELECT COUNT(*) FROM pg_available_extensions WHERE name = 'vector'"
+    ))
+    has_pgvector = result.scalar() > 0
+
+    if has_pgvector:
         conn.execute(sa.text("CREATE EXTENSION IF NOT EXISTS vector;"))
         conn.execute(sa.text("""
             ALTER TABLE needs ADD COLUMN IF NOT EXISTS embedding vector(1536);
             CREATE INDEX IF NOT EXISTS needs_embedding_idx ON needs
             USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
         """))
-    except Exception as e:
-        print(f"[SKIP] pgvector not available on this host ({e}). "
-              "Install pgvector or use the Docker compose setup for full functionality.")
-        conn.execute(sa.text("ROLLBACK"))
+    else:
+        print("[SKIP] pgvector extension is not available on this PostgreSQL instance. "
+              "Semantic deduplication features will be disabled.")
 
 
 def downgrade():
