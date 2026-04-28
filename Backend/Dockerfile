@@ -11,11 +11,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy and install Python dependencies into a clean prefix
-COPY requirements.txt .
+COPY requirements.txt requirements.docker.txt ./
 RUN pip install --upgrade pip "setuptools<70.0.0" wheel \
     && pip install --prefix=/install --no-cache-dir \
       --extra-index-url https://download.pytorch.org/whl/cpu \
-      -r requirements.txt
+      -r requirements.docker.txt \
+    && pip install --prefix=/install --no-cache-dir \
+      --extra-index-url https://download.pytorch.org/whl/cpu \
+      torch==2.3.1+cpu \
+    && pip install --prefix=/install --no-cache-dir --no-build-isolation \
+      openai-whisper==20231117
 
 
 # ─── Stage 2: Runtime ────────────────────────────────────────────────────────
