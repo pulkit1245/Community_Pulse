@@ -15,7 +15,7 @@ class MatchResult(BaseModel):
     need_id: uuid.UUID
     volunteer_id: uuid.UUID
     match_score: float
-    assignment_id: uuid.UUID
+    assignment_id: Optional[uuid.UUID] = None  # None during dry_run
 
 
 class MatchResponse(BaseModel):

@@ -23,7 +23,8 @@ class Assignment(Base):
     need_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("needs.id"), nullable=False)
     volunteer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("volunteers.id"), nullable=False)
     status: Mapped[AssignmentStatus] = mapped_column(
-        SAEnum(AssignmentStatus), default=AssignmentStatus.PENDING
+        SAEnum(AssignmentStatus, native_enum=False, values_callable=lambda x: [e.value for e in x]),
+        default=AssignmentStatus.PENDING,
     )
     match_score: Mapped[float] = mapped_column(Float, nullable=True)
     notes: Mapped[str] = mapped_column(Text, nullable=True)

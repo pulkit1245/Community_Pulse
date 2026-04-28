@@ -2,14 +2,19 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlalchemy.orm import DeclarativeBase
 from app.core.config import settings
 
-engine = create_async_engine(
-    settings.async_database_url,
-    echo=settings.debug,           # Disable SQL logging in production
-    pool_size=10,
-    max_overflow=20,
-    pool_pre_ping=True,            # Detect stale connections (important for Railway cold-starts)
-    pool_recycle=300,              # Recycle connections every 5 min to avoid Railway's idle timeout
-)
+engine_kwargs = {
+    "echo": settings.debug,
+}
+
+if not settings.async_database_url.startswith("sqlite"):
+    engine_kwargs.update(
+        pool_size=10,
+        max_overflow=20,
+        pool_pre_ping=True,
+        pool_recycle=300,
+    )
+
+engine = create_async_engine(settings.async_database_url, **engine_kwargs)
 
 AsyncSessionLocal = async_sessionmaker(
     engine,

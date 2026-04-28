@@ -40,6 +40,7 @@ export function taskStatusConfig(status: string) {
 }
 
 /** Capitalise first letter */
-export function capitalize(s: string) {
+export function capitalize(s: string | undefined | null) {
+  if (!s) return "";
   return s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, " ");
 }

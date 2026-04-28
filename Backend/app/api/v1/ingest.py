@@ -90,7 +90,7 @@ async def whatsapp_verify(request: Request):
     challenge = params.get("hub.challenge")
 
     if mode == "subscribe" and token == settings.whatsapp_verify_token:
-        return int(challenge)
+        return challenge
     raise HTTPException(status_code=403, detail="Verification failed")
 
 

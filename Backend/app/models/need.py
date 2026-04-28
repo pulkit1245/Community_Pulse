@@ -28,8 +28,14 @@ class Need(Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     category: Mapped[str] = mapped_column(String(100), nullable=False)
-    urgency: Mapped[UrgencyLevel] = mapped_column(SAEnum(UrgencyLevel), default=UrgencyLevel.MEDIUM)
-    status: Mapped[NeedStatus] = mapped_column(SAEnum(NeedStatus), default=NeedStatus.OPEN)
+    urgency: Mapped[UrgencyLevel] = mapped_column(
+        SAEnum(UrgencyLevel, native_enum=False, values_callable=lambda x: [e.value for e in x]),
+        default=UrgencyLevel.MEDIUM,
+    )
+    status: Mapped[NeedStatus] = mapped_column(
+        SAEnum(NeedStatus, native_enum=False, values_callable=lambda x: [e.value for e in x]),
+        default=NeedStatus.OPEN,
+    )
     zone_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("zones.id"), nullable=False)
     requester_name: Mapped[str] = mapped_column(String(200), nullable=True)
     requester_phone: Mapped[str] = mapped_column(String(20), nullable=True)

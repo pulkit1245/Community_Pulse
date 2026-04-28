@@ -26,26 +26,29 @@ export default function DashboardPage() {
   const [loadingNeeds, setLoadingNeeds] = useState(true);
 
   const fetchData = useCallback(async () => {
+    // Fetch stats and zones independently so one failure doesn't block the other
     try {
-      const [s, z] = await Promise.all([
-        dashboardService.getStats(),
-        dashboardService.getZones(),
-      ]);
+      const s = await dashboardService.getStats();
       setStats(s);
-      setZones(z);
     } catch {
-      // Silently fail on poll; error shown on first load via loading state
+      // keep previous stats on poll failure
     } finally {
       setLoadingStats(false);
     }
 
     try {
+      const z = await dashboardService.getZones();
+      setZones(z);
+    } catch {
+      // zones failure is non-fatal
+    }
+
+    try {
       const paged = await needsService.list({
-        status: "unmatched",
+        status: "unmatched" as never,  // mapped to 'open' by needs.service.ts
         limit: 8,
         page: 1,
       });
-      // Sort by urgency_score desc
       const sorted = [...paged.items].sort((a, b) => b.urgency_score - a.urgency_score);
       setCritNeeds(sorted);
     } catch {

@@ -33,11 +33,21 @@ slowapi==0.1.9
 
 # ─── Config ──────────────────────────────────────────────────
 python-dotenv==1.0.1
+
 # ─── Machine Learning ─────────────────────────────────────────
 spacy==3.7.4
 pytesseract==0.3.10
 Pillow==10.3.0
 pandas==2.2.2
 prophet==1.1.5
-torch==2.3.1+cpu
 openai-whisper==20231117
+
+# ─── PyTorch (OS Specific) ───────────────────────────────────
+# Explicitly use the PyTorch CPU index for Linux to save ~2.5GB of GPU bloat
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# Install standard torch on Mac (Darwin), but the +cpu version on Linux
+torch==2.3.1 ; sys_platform == 'darwin'
+torch==2.3.1+cpu ; sys_platform == 'linux'
+torchaudio==2.3.1 ; sys_platform == 'darwin'
+torchaudio==2.3.1+cpu ; sys_platform == 'linux'

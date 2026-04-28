@@ -14,29 +14,55 @@ router = APIRouter(prefix="/needs", tags=["needs"])
 @router.get("", response_model=NeedListResponse)
 async def list_needs(
     zone_id: Optional[uuid.UUID] = Query(None),
-    status: Optional[NeedStatus] = Query(None),
-    urgency: Optional[UrgencyLevel] = Query(None),
+    status: Optional[str] = Query(None),
+    urgency: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(get_current_user),
 ):
-    query = select(Need)
+    from sqlalchemy import cast, String, text
+
+    # Build base filter conditions as text conditions to avoid enum comparison issues
+    conditions = []
     if zone_id:
-        query = query.where(Need.zone_id == zone_id)
+        conditions.append(f"zone_id = '{zone_id}'")
     if status:
-        query = query.where(Need.status == status)
+        conditions.append(f"LOWER(status) = '{status.lower()}'")
     if urgency:
-        query = query.where(Need.urgency == urgency)
+        conditions.append(f"LOWER(urgency) = '{urgency.lower()}'")
     if category:
-        query = query.where(Need.category == category)
+        conditions.append(f"LOWER(category) = '{category.lower()}'")
 
-    count_result = await db.execute(select(func.count()).select_from(query.subquery()))
-    total = count_result.scalar()
+    where_clause = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+    offset = (page - 1) * page_size
 
-    query = query.order_by(Need.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
-    result = await db.execute(query)
+    # Count query
+    count_row = await db.execute(
+        text(f"SELECT COUNT(*) FROM needs {where_clause}")
+    )
+    total = count_row.scalar() or 0
+
+    # Fetch items
+    rows = await db.execute(
+        text(f"""
+            SELECT id FROM needs
+            {where_clause}
+            ORDER BY created_at DESC
+            LIMIT {page_size} OFFSET {offset}
+        """)
+    )
+    ids = [row[0] for row in rows.fetchall()]
+
+    if not ids:
+        return NeedListResponse(items=[], total=total, page=page, page_size=page_size)
+
+    # Fetch full ORM objects by ID (avoids enum comparison issues entirely)
+    id_list = ", ".join(f"'{i}'" for i in ids)
+    result = await db.execute(
+        select(Need).where(text(f"id IN ({id_list})")).order_by(Need.created_at.desc())
+    )
     items = list(result.scalars().all())
 
     return NeedListResponse(items=items, total=total, page=page, page_size=page_size)

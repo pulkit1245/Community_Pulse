@@ -1,0 +1,1729 @@
+{
+  "run_at": "2026-04-28T22:56:44.522552",
+  "base_url": "http://localhost:8000",
+  "summary": {
+    "total": 31,
+    "passed": 27,
+    "failed": 4,
+    "errors": 0
+  },
+  "tests": [
+    {
+      "description": "Application health check",
+      "method": "GET",
+      "url": "http://localhost:8000/health",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": null,
+        "params": null
+      },
+      "response": {
+        "status_code": 200,
+        "body": {
+          "status": "healthy",
+          "app": "Disaster Relief Backend",
+          "environment": "development",
+          "version": "1.0.0"
+        }
+      },
+      "expected_status": 200,
+      "elapsed_ms": 7.4,
+      "result": "PASS"
+    },
+    {
+      "description": "Readiness / DB connectivity check",
+      "method": "GET",
+      "url": "http://localhost:8000/ready",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": null,
+        "params": null
+      },
+      "response": {
+        "status_code": 200,
+        "body": {
+          "ready": true,
+          "database": "connected"
+        }
+      },
+      "expected_status": 200,
+      "elapsed_ms": 1.6,
+      "result": "PASS"
+    },
+    {
+      "description": "Login with valid coordinator credentials",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/auth/login",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "phone": "+919810000001",
+          "password": "password123"
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 200,
+        "body": {
+          "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjYjg4MzFhMS02M2VmLTRiMDgtOGUyNy02MjNhZGY3NWI1NTUiLCJyb2xlIjoiY29vcmRpbmF0b3IiLCJwaG9uZSI6Iis5MTk4MTAwMDAwMDEiLCJleHAiOjE3Nzc0MDA4MDN9.U_P1WQmoiRHY2MV6LJxYqs97IoRdY6ucG2ohtO7wLXU",
+          "token_type": "bearer",
+          "expires_in": 3600,
+          "role": "coordinator"
+        }
+      },
+      "expected_status": 200,
+      "elapsed_ms": 285.5,
+      "result": "PASS"
+    },
+    {
+      "description": "Login with wrong password \u2014 expect 401",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/auth/login",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "phone": "+919810000001",
+          "password": "wrong_password_xyz"
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 401,
+        "body": {
+          "detail": "Invalid credentials"
+        }
+      },
+      "expected_status": 401,
+      "elapsed_ms": 215.2,
+      "result": "PASS"
+    },
+    {
+      "description": "Login with non-existent phone \u2014 expect 401",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/auth/login",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "phone": "+910000000000",
+          "password": "password123"
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 401,
+        "body": {
+          "detail": "Invalid credentials"
+        }
+      },
+      "expected_status": 401,
+      "elapsed_ms": 4.2,
+      "result": "PASS"
+    },
+    {
+      "description": "Login with missing password field \u2014 expect 422",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/auth/login",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "phone": "+919810000001"
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 422,
+        "body": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "password"
+              ],
+              "msg": "Field required",
+              "input": {
+                "phone": "+919810000001"
+              }
+            }
+          ]
+        }
+      },
+      "expected_status": 422,
+      "elapsed_ms": 2.3,
+      "result": "PASS"
+    },
+    {
+      "description": "List needs \u2014 no auth",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/needs",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": null,
+        "params": null
+      },
+      "response": {
+        "status_code": 403,
+        "body": {
+          "detail": "Not authenticated"
+        }
+      },
+      "expected_status": 403,
+      "elapsed_ms": 1.8,
+      "result": "PASS"
+    },
+    {
+      "description": "List needs filtered by zone + urgency",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/needs",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": null,
+        "params": {
+          "zone_id": "8aa31a74-d2c0-41e0-9003-42b6ece6a12b",
+          "urgency": "critical",
+          "page": 1,
+          "page_size": 5
+        }
+      },
+      "response": {
+        "status_code": 200,
+        "body": {
+          "items": [],
+          "total": 0,
+          "page": 1,
+          "page_size": 5
+        }
+      },
+      "expected_status": 200,
+      "elapsed_ms": 39.7,
+      "result": "PASS"
+    },
+    {
+      "description": "List needs filtered by status + category",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/needs",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": null,
+        "params": {
+          "status": "open",
+          "category": "medical",
+          "page_size": 10
+        }
+      },
+      "response": {
+        "status_code": 200,
+        "body": {
+          "items": [
+            {
+              "id": "20f4638b-6279-4ce1-b12a-5fd037bc8da3",
+              "title": "[DEMO] Wound dressing for 12 people",
+              "description": null,
+              "category": "medical",
+              "urgency": "high",
+              "status": "open",
+              "zone_id": "199a4e36-281e-4779-90b2-d9a9740bb76c",
+              "requester_name": null,
+              "requester_phone": null,
+              "skills_required": [
+                "first_aid"
+              ],
+              "people_count": 12,
+              "source": "whatsapp",
+              "created_at": "2026-04-28T17:21:27.932313Z",
+              "updated_at": "2026-04-28T17:21:27.932313Z"
+            },
+            {
+              "id": "2aaddd96-103f-4627-8078-b5de5a92f450",
+              "title": "[DEMO] Insulin shortage \u2014 diabetic patients",
+              "description": null,
+              "category": "medical",
+              "urgency": "high",
+              "status": "open",
+              "zone_id": "199a4e36-281e-4779-90b2-d9a9740bb76c",
+              "requester_name": null,
+              "requester_phone": null,
+              "skills_required": [
+                "medical"
+              ],
+              "people_count": 8,
+              "source": "api",
+              "created_at": "2026-04-28T17:21:27.932310Z",
+              "updated_at": "2026-04-28T17:21:27.932311Z"
+            },
+            {
+              "id": "1f29123c-8753-4e12-9a89-6f3afbcd891b",
+              "title": "Medical assistance required (42)",
+              "description": "Detailed description for need 42. Immediate attention required.",
+              "category": "medical",
+              "urgency": "critical",
+              "status": "open",
+              "zone_id": "9dac5bb9-d616-44a7-840e-399a6e87d99f",
+              "requester_name": "Resident 42",
+              "requester_phone": "+919910000041",
+              "skills_required": [
+                "medical",
+                "first_aid"
+              ],
+              "people_count": 2,
+              "source": "seed",
+              "created_at": "2026-04-28T17:21:19.374101Z",
+              "updated_at": "2026-04-28T17:21:19.374102Z"
+            },
+            {
+              "id": "ee204c49-1e74-4d54-a10b-55120291c325",
+              "title": "Medical assistance required (32)",
+              "description": "Detailed description for need 32. Immediate attention required.",
+              "category": "medical",
+              "urgency": "critical",
+              "status": "open",
+              "zone_id": "d5c9a61c-a647-4b54-8918-a484e637c504",
+              "requester_name": "Resident 32",
+              "requester_phone": "+919910000031",
+              "skills_required": [
+                "medical",
+                "first_aid"
+              ],
+              "people_count": 2,
+              "source": "seed",
+              "created_at": "2026-04-28T17:21:19.374081Z",
+              "updated_at": "2026-04-28T17:21:19.374081Z"
+            },
+            {
+              "id": "0c1465e7-7f4e-48c9-a554-df89857655a2",
+              "title": "Medical assistance required (22)",
+              "description": "Detailed description for need 22. Immediate attention required.",
+              "category": "medical",
+              "urgency": "critical",
+              "status": "open",
+              "zone_id": "55be3f93-21a7-4af1-ac87-942c8c4aa2a9",
+              "requester_name": "Resident 22",
+              "requester_phone": "+919910000021",
+              "skills_required": [
+                "medical",
+                "first_aid"
+              ],
+              "people_count": 2,
+              "source": "seed",
+              "created_at": "2026-04-28T17:21:19.374058Z",
+              "updated_at": "2026-04-28T17:21:19.374058Z"
+            },
+            {
+              "id": "30a46f03-cbdd-41a7-9276-e9e7ca8a5d5f",
+              "title": "Medical assistance required (12)",
+              "description": "Detailed description for need 12. Immediate attention required.",
+              "category": "medical",
+              "urgency": "critical",
+              "status": "open",
+              "zone_id": "9dac5bb9-d616-44a7-840e-399a6e87d99f",
+              "requester_name": "Resident 12",
+              "requester_phone": "+919910000011",
+              "skills_required": [
+                "medical",
+                "first_aid"
+              ],
+              "people_count": 2,
+              "source": "seed",
+              "created_at": "2026-04-28T17:21:19.374038Z",
+              "updated_at": "2026-04-28T17:21:19.374038Z"
+            },
+            {
+              "id": "75c0649d-e5c4-4623-9f51-e644156bfdea",
+              "title": "Medical assistance required (2)",
+              "description": "Detailed description for need 2. Immediate attention required.",
+              "category": "medical",
+              "urgency": "critical",
+              "status": "open",
+              "zone_id": "d5c9a61c-a647-4b54-8918-a484e637c504",
+              "requester_name": "Resident 2",
+              "requester_phone": "+919910000001",
+              "skills_required": [
+                "medical",
+                "first_aid"
+              ],
+              "people_count": 2,
+              "source": "seed",
+              "created_at": "2026-04-28T17:21:19.374012Z",
+              "updated_at": "2026-04-28T17:21:19.374012Z"
+            }
+          ],
+          "total": 7,
+          "page": 1,
+          "page_size": 10
+        }
+      },
+      "expected_status": 200,
+      "elapsed_ms": 7.6,
+      "result": "PASS"
+    },
+    {
+      "description": "Create a new need",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/needs",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": {
+          "title": "TEST: Emergency food supplies needed",
+          "description": "50 families displaced by flooding need food and clean water",
+          "category": "food_water",
+          "urgency": "high",
+          "zone_id": "8aa31a74-d2c0-41e0-9003-42b6ece6a12b",
+          "requester_name": "Test Village Head",
+          "requester_phone": "+919876543210",
+          "skills_required": [
+            "logistics",
+            "driving"
+          ],
+          "people_count": 250,
+          "source": "api"
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 500,
+        "body": {
+          "detail": "Internal server error"
+        }
+      },
+      "expected_status": 201,
+      "elapsed_ms": 37.4,
+      "result": "FAIL"
+    },
+    {
+      "description": "Create duplicate need \u2014 expect 409",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/needs",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": {
+          "title": "TEST: Emergency food supplies needed",
+          "description": "50 families displaced by flooding need food and clean water",
+          "category": "food_water",
+          "urgency": "high",
+          "zone_id": "8aa31a74-d2c0-41e0-9003-42b6ece6a12b",
+          "requester_name": "Test Village Head",
+          "requester_phone": "+919876543210",
+          "skills_required": [
+            "logistics",
+            "driving"
+          ],
+          "people_count": 250,
+          "source": "api"
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 500,
+        "body": {
+          "detail": "Internal server error"
+        }
+      },
+      "expected_status": 409,
+      "elapsed_ms": 10.0,
+      "result": "FAIL"
+    },
+    {
+      "description": "Get non-existent need \u2014 expect 404",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/needs/00000000-0000-0000-0000-000000000000",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": null,
+        "params": null
+      },
+      "response": {
+        "status_code": 404,
+        "body": {
+          "detail": "Endpoint not found"
+        }
+      },
+      "expected_status": 404,
+      "elapsed_ms": 4.5,
+      "result": "PASS"
+    },
+    {
+      "description": "Create need without auth \u2014 expect 403",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/needs",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "title": "Unauth test",
+          "description": "test",
+          "category": "rescue",
+          "urgency": "low",
+          "zone_id": "8aa31a74-d2c0-41e0-9003-42b6ece6a12b",
+          "requester_phone": "+919000000000"
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 403,
+        "body": {
+          "detail": "Not authenticated"
+        }
+      },
+      "expected_status": 403,
+      "elapsed_ms": 2.4,
+      "result": "PASS"
+    },
+    {
+      "description": "List all volunteers",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/volunteers",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": null,
+        "params": null
+      },
+      "response": {
+        "status_code": 200,
+        "body": {
+          "items": [
+            {
+              "id": "7f67cd98-e417-4ad4-8080-fcc9bb277bd8",
+              "name": "Priya Sharma",
+              "phone": "+919810000000",
+              "email": "volunteer0@relief.org",
+              "skills": [
+                "first_aid",
+                "construction"
+              ],
+              "zone_id": "81096fec-3bf0-4450-8757-d547cce7f68b",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi",
+                "english"
+              ],
+              "role": "coordinator",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364335Z"
+            },
+            {
+              "id": "cb8831a1-63ef-4b08-8e27-623adf75b555",
+              "name": "Rahul Verma",
+              "phone": "+919810000001",
+              "email": "volunteer1@relief.org",
+              "skills": [
+                "medical",
+                "cooking"
+              ],
+              "zone_id": "d5c9a61c-a647-4b54-8918-a484e637c504",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi"
+              ],
+              "role": "coordinator",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364342Z"
+            },
+            {
+              "id": "8ab20fd2-bc5a-40b1-9346-5c3f5f2ba836",
+              "name": "Anjali Singh",
+              "phone": "+919810000002",
+              "email": "volunteer2@relief.org",
+              "skills": [
+                "search_rescue",
+                "driving"
+              ],
+              "zone_id": "199a4e36-281e-4779-90b2-d9a9740bb76c",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi",
+                "english"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364345Z"
+            },
+            {
+              "id": "330f84ad-37db-44d7-9978-88e166324e01",
+              "name": "Mohammed Ali",
+              "phone": "+919810000003",
+              "email": "volunteer3@relief.org",
+              "skills": [
+                "construction",
+                "communication"
+              ],
+              "zone_id": "55be3f93-21a7-4af1-ac87-942c8c4aa2a9",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364347Z"
+            },
+            {
+              "id": "d72d9608-ab23-49ca-b7e9-63a24228d6d8",
+              "name": "Sunita Patel",
+              "phone": "+919810000004",
+              "email": "volunteer4@relief.org",
+              "skills": [
+                "cooking",
+                "counseling"
+              ],
+              "zone_id": "d4ec88a3-de93-4612-ba29-5097a41a80c1",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi",
+                "english"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364349Z"
+            },
+            {
+              "id": "a72666aa-d41f-45eb-bb8e-71caf0171bda",
+              "name": "Amit Gupta",
+              "phone": "+919810000005",
+              "email": "volunteer5@relief.org",
+              "skills": [
+                "driving",
+                "logistics"
+              ],
+              "zone_id": "9dac5bb9-d616-44a7-840e-399a6e87d99f",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364352Z"
+            },
+            {
+              "id": "7a2dcc6a-7d98-4d68-9dcb-b6b115d6d9e9",
+              "name": "Kavita Joshi",
+              "phone": "+919810000006",
+              "email": "volunteer6@relief.org",
+              "skills": [
+                "communication",
+                "translation"
+              ],
+              "zone_id": "81096fec-3bf0-4450-8757-d547cce7f68b",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi",
+                "english"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364354Z"
+            },
+            {
+              "id": "a48f2aba-3c6c-419d-a64d-52da5385131f",
+              "name": "Rajesh Kumar",
+              "phone": "+919810000007",
+              "email": "volunteer7@relief.org",
+              "skills": [
+                "counseling",
+                "engineering"
+              ],
+              "zone_id": "d5c9a61c-a647-4b54-8918-a484e637c504",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364356Z"
+            },
+            {
+              "id": "1035aeba-d297-443b-ac71-11e536543d13",
+              "name": "Deepa Nair",
+              "phone": "+919810000008",
+              "email": "volunteer8@relief.org",
+              "skills": [
+                "logistics",
+                "childcare"
+              ],
+              "zone_id": "199a4e36-281e-4779-90b2-d9a9740bb76c",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi",
+                "english"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364359Z"
+            },
+            {
+              "id": "d15ac833-3bf0-4c4a-9676-d0326728d49e",
+              "name": "Arun Mehta",
+              "phone": "+919810000009",
+              "email": "volunteer9@relief.org",
+              "skills": [
+                "translation",
+                "first_aid"
+              ],
+              "zone_id": "55be3f93-21a7-4af1-ac87-942c8c4aa2a9",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364361Z"
+            },
+            {
+              "id": "1b4c0e51-42cf-4429-914b-6b3478af11cd",
+              "name": "Neha Agarwal",
+              "phone": "+919810000010",
+              "email": "volunteer10@relief.org",
+              "skills": [
+                "engineering",
+                "medical"
+              ],
+              "zone_id": "d4ec88a3-de93-4612-ba29-5097a41a80c1",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi",
+                "english"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364363Z"
+            },
+            {
+              "id": "006c1932-2673-40ad-8340-cdf546068d2a",
+              "name": "Vijay Rao",
+              "phone": "+919810000011",
+              "email": "volunteer11@relief.org",
+              "skills": [
+                "childcare",
+                "search_rescue"
+              ],
+              "zone_id": "9dac5bb9-d616-44a7-840e-399a6e87d99f",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364365Z"
+            },
+            {
+              "id": "26de20c7-a857-4f7a-a619-af32e9c94d0c",
+              "name": "Pooja Mishra",
+              "phone": "+919810000012",
+              "email": "volunteer12@relief.org",
+              "skills": [
+                "first_aid",
+                "construction"
+              ],
+              "zone_id": "81096fec-3bf0-4450-8757-d547cce7f68b",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi",
+                "english"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364368Z"
+            },
+            {
+              "id": "b96dc919-09f0-480b-99a7-97ab272da28c",
+              "name": "Sanjay Tiwari",
+              "phone": "+919810000013",
+              "email": "volunteer13@relief.org",
+              "skills": [
+                "medical",
+                "cooking"
+              ],
+              "zone_id": "d5c9a61c-a647-4b54-8918-a484e637c504",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364370Z"
+            },
+            {
+              "id": "d7fcb9f0-2dc4-4ea2-816e-75c5ece5f101",
+              "name": "Rekha Dubey",
+              "phone": "+919810000014",
+              "email": "volunteer14@relief.org",
+              "skills": [
+                "search_rescue",
+                "driving"
+              ],
+              "zone_id": "199a4e36-281e-4779-90b2-d9a9740bb76c",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi",
+                "english"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364372Z"
+            },
+            {
+              "id": "835677f4-38b9-4acb-ab4d-1c9542bdfe86",
+              "name": "Rohit Yadav",
+              "phone": "+919810000015",
+              "email": "volunteer15@relief.org",
+              "skills": [
+                "construction",
+                "communication"
+              ],
+              "zone_id": "55be3f93-21a7-4af1-ac87-942c8c4aa2a9",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364374Z"
+            },
+            {
+              "id": "09927a42-790d-4d7d-ab08-2442e460e12f",
+              "name": "Meena Chaudhary",
+              "phone": "+919810000016",
+              "email": "volunteer16@relief.org",
+              "skills": [
+                "cooking",
+                "counseling"
+              ],
+              "zone_id": "d4ec88a3-de93-4612-ba29-5097a41a80c1",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi",
+                "english"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364377Z"
+            },
+            {
+              "id": "6bfe48b5-f7ef-4317-93db-7ae9c96b98f6",
+              "name": "Suresh Pandey",
+              "phone": "+919810000017",
+              "email": "volunteer17@relief.org",
+              "skills": [
+                "driving",
+                "logistics"
+              ],
+              "zone_id": "9dac5bb9-d616-44a7-840e-399a6e87d99f",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364379Z"
+            },
+            {
+              "id": "e86e866a-e636-443e-9e40-fc3af674e12f",
+              "name": "Lata Tripathi",
+              "phone": "+919810000018",
+              "email": "volunteer18@relief.org",
+              "skills": [
+                "communication",
+                "translation"
+              ],
+              "zone_id": "81096fec-3bf0-4450-8757-d547cce7f68b",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi",
+                "english"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364381Z"
+            },
+            {
+              "id": "f11dbf07-0973-4b71-ac3c-9a0fa9adbf7f",
+              "name": "Manoj Sinha",
+              "phone": "+919810000019",
+              "email": "volunteer19@relief.org",
+              "skills": [
+                "counseling",
+                "engineering"
+              ],
+              "zone_id": "d5c9a61c-a647-4b54-8918-a484e637c504",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi"
+              ],
+              "role": "volunteer",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364383Z"
+            }
+          ],
+          "total": 35,
+          "page": 1,
+          "page_size": 20
+        }
+      },
+      "expected_status": 200,
+      "elapsed_ms": 5.6,
+      "result": "PASS"
+    },
+    {
+      "description": "List volunteers filtered by zone + available",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/volunteers",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": null,
+        "params": {
+          "zone_id": "8aa31a74-d2c0-41e0-9003-42b6ece6a12b",
+          "available_only": "true",
+          "page_size": 10
+        }
+      },
+      "response": {
+        "status_code": 200,
+        "body": {
+          "items": [],
+          "total": 0,
+          "page": 1,
+          "page_size": 10
+        }
+      },
+      "expected_status": 200,
+      "elapsed_ms": 5.8,
+      "result": "PASS"
+    },
+    {
+      "description": "List volunteers filtered by skill=medical",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/volunteers",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": null,
+        "params": {
+          "skill": "medical",
+          "page": 1,
+          "page_size": 5
+        }
+      },
+      "response": {
+        "status_code": 200,
+        "body": {
+          "items": [
+            {
+              "id": "cb8831a1-63ef-4b08-8e27-623adf75b555",
+              "name": "Rahul Verma",
+              "phone": "+919810000001",
+              "email": "volunteer1@relief.org",
+              "skills": [
+                "medical",
+                "cooking"
+              ],
+              "zone_id": "d5c9a61c-a647-4b54-8918-a484e637c504",
+              "is_available": true,
+              "is_active": true,
+              "bio": null,
+              "languages": [
+                "hindi"
+              ],
+              "role": "coordinator",
+              "total_assignments": 0,
+              "completed_assignments": 0,
+              "created_at": "2026-04-28T17:21:19.364342Z"
+            }
+          ],
+          "total": 35,
+          "page": 1,
+          "page_size": 5
+        }
+      },
+      "expected_status": 200,
+      "elapsed_ms": 4.5,
+      "result": "PASS"
+    },
+    {
+      "description": "Create a new volunteer",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/volunteers",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": {
+          "name": "TEST Volunteer Sam",
+          "phone": "+917000040459",
+          "email": "sam40459@test.org",
+          "skills": [
+            "first_aid",
+            "communication"
+          ],
+          "zone_id": "8aa31a74-d2c0-41e0-9003-42b6ece6a12b",
+          "bio": "API test volunteer \u2014 safe to delete",
+          "languages": [
+            "english",
+            "hindi"
+          ],
+          "password": "testpassword123"
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 500,
+        "body": {
+          "detail": "Internal server error"
+        }
+      },
+      "expected_status": 201,
+      "elapsed_ms": 301.6,
+      "result": "FAIL"
+    },
+    {
+      "description": "Get non-existent volunteer \u2014 expect 404",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/volunteers/00000000-0000-0000-0000-000000000000",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": null,
+        "params": null
+      },
+      "response": {
+        "status_code": 404,
+        "body": {
+          "detail": "Endpoint not found"
+        }
+      },
+      "expected_status": 404,
+      "elapsed_ms": 4.0,
+      "result": "PASS"
+    },
+    {
+      "description": "Run matching algorithm (dry run, all zones)",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/match",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": {
+          "dry_run": true
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 200,
+        "body": {
+          "assignments": [
+            {
+              "need_id": "06785bda-4a12-48ac-ba4a-4407a30ddb7a",
+              "volunteer_id": "7a2dcc6a-7d98-4d68-9dcb-b6b115d6d9e9",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "75c0649d-e5c4-4623-9f51-e644156bfdea",
+              "volunteer_id": "cb8831a1-63ef-4b08-8e27-623adf75b555",
+              "match_score": 8.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "186a2cb8-33ec-47bf-b55f-47903846af86",
+              "volunteer_id": "8ab20fd2-bc5a-40b1-9346-5c3f5f2ba836",
+              "match_score": 9.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "4ef06675-d573-481c-bb78-792734715267",
+              "volunteer_id": "330f84ad-37db-44d7-9978-88e166324e01",
+              "match_score": 8.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "197e7231-e6ab-4a2c-bf47-fc2ab5a44857",
+              "volunteer_id": "641f52b1-b26d-4735-8443-04ee15220f7e",
+              "match_score": 8.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "8256a771-b1a1-4ca6-91a8-1e56c0d9d632",
+              "volunteer_id": "a72666aa-d41f-45eb-bb8e-71caf0171bda",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "cf858e20-c766-46af-9ac2-f9409983f906",
+              "volunteer_id": "d72d9608-ab23-49ca-b7e9-63a24228d6d8",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "30a46f03-cbdd-41a7-9276-e9e7ca8a5d5f",
+              "volunteer_id": "006c1932-2673-40ad-8340-cdf546068d2a",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "f5dccd8a-b807-4539-a5d0-4c129ae762cc",
+              "volunteer_id": "26de20c7-a857-4f7a-a619-af32e9c94d0c",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "b23b68c6-4441-424f-8cbd-cdb74af94d79",
+              "volunteer_id": "a48f2aba-3c6c-419d-a64d-52da5385131f",
+              "match_score": 6.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "f5177577-d6f7-482d-9b80-76b2b7c1a575",
+              "volunteer_id": "1035aeba-d297-443b-ac71-11e536543d13",
+              "match_score": 8.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "9a2e9b8d-4c8b-4fbd-9922-99d85b354976",
+              "volunteer_id": "946d6af4-0290-489e-a93f-3d4ad2390342",
+              "match_score": 6.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "33784db6-5a71-4796-92e0-d86b38837f68",
+              "volunteer_id": "09927a42-790d-4d7d-ab08-2442e460e12f",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "93bc1757-166f-4eea-a42c-2d6e9bd25060",
+              "volunteer_id": "6bfe48b5-f7ef-4317-93db-7ae9c96b98f6",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "15bf7255-21bd-4f56-b0df-f2bad2605329",
+              "volunteer_id": "a6fcd192-3813-4892-a7a6-1da6302b3b30",
+              "match_score": 8.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "0c1465e7-7f4e-48c9-a554-df89857655a2",
+              "volunteer_id": "d15ac833-3bf0-4c4a-9676-d0326728d49e",
+              "match_score": 8.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "4e408b0f-a2e9-422e-879f-21fcef3bf8cf",
+              "volunteer_id": "1b4c0e51-42cf-4429-914b-6b3478af11cd",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "d1bcff86-2882-4a87-8f69-e6b026ad8d51",
+              "volunteer_id": "f11dbf07-0973-4b71-ac3c-9a0fa9adbf7f",
+              "match_score": 6.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "63ca7e41-5d50-478e-aeba-c117759b8e59",
+              "volunteer_id": "c7cdf1e9-df34-419f-836d-9ab1969fb049",
+              "match_score": 9.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "ee204c49-1e74-4d54-a10b-55120291c325",
+              "volunteer_id": "b96dc919-09f0-480b-99a7-97ab272da28c",
+              "match_score": 8.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "2c46d1a8-8e70-4483-9d99-082cfadbf0cb",
+              "volunteer_id": "d7fcb9f0-2dc4-4ea2-816e-75c5ece5f101",
+              "match_score": 9.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "773c0e69-73c6-4383-8278-72701619cf9a",
+              "volunteer_id": "835677f4-38b9-4acb-ab4d-1c9542bdfe86",
+              "match_score": 8.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "4cafa9fb-a1ed-4d8a-b654-2b00c9f12e57",
+              "volunteer_id": "bb8ad4e4-085e-4ea4-bf5f-9cd18b47bc00",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "1cf7565b-cfb3-41aa-b419-5abb2fcf9dd6",
+              "volunteer_id": "b1ac835d-c426-4ae8-89ea-3263e6f73a50",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "1f29123c-8753-4e12-9a89-6f3afbcd891b",
+              "volunteer_id": "4a849b53-a784-4d60-a028-c88c1b761495",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "cc2582e1-8a3c-4aa8-832e-9d2ecf8335f6",
+              "volunteer_id": "148ed519-8207-45d8-aed4-6b9de9e86829",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "2d3979df-d82d-49f8-ba28-d3c6663edc79",
+              "volunteer_id": "ed4a62ae-00ea-4a60-974e-bafd8e89962c",
+              "match_score": 6.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "c0e49a0f-f7f8-4834-b940-28f307c04581",
+              "volunteer_id": "c088b7f5-ff93-4f08-88d9-319020124039",
+              "match_score": 6.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "6bb74bc6-9d8e-41a4-9b3b-4990f285ad84",
+              "volunteer_id": "91594f31-f848-4af8-b9f9-da58eb4d036d",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "9a7271a6-52dd-4d35-83e4-cd1d7001a486",
+              "volunteer_id": "ee88ec04-3443-4cd0-aed8-281e70f8ef89",
+              "match_score": 9.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "4f9a1719-5a21-4b5a-b76a-8f04528832d0",
+              "volunteer_id": "7f67cd98-e417-4ad4-8080-fcc9bb277bd8",
+              "match_score": 8.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "a95a45c1-e0ad-4df8-8189-18e144d497f3",
+              "volunteer_id": "939b7b9b-ffd4-4c65-bb75-8e0ee5b8fad5",
+              "match_score": 8.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "2aaddd96-103f-4627-8078-b5de5a92f450",
+              "volunteer_id": "b996e2d4-4d6a-4e98-bc1a-30e1b5fd5270",
+              "match_score": 8.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "bf5ffd34-c9e9-4b76-b9b8-2971beedbd93",
+              "volunteer_id": "479746ee-6204-4a58-b49e-f05094139305",
+              "match_score": 7.0,
+              "assignment_id": null
+            },
+            {
+              "need_id": "dd99046d-06a5-4b53-91de-a678ea46ec45",
+              "volunteer_id": "e86e866a-e636-443e-9e40-fc3af674e12f",
+              "match_score": 7.0,
+              "assignment_id": null
+            }
+          ],
+          "total_matched": 35,
+          "unmatched_needs": [
+            "a85f56af-3684-441a-bee8-d33140b72c49",
+            "c695bd05-eac4-4fac-87f7-979dd3343f4a",
+            "b4a2a816-5dbc-4409-ac7f-ffa39c685292",
+            "be232e22-77b3-4cb1-b7cf-b0069684da1d",
+            "9264568f-d65e-46f9-83f3-4bd5cc9d946e",
+            "1207fa08-048e-49d2-8690-a67442a4599a",
+            "089b50d2-85c5-473d-b521-288addae8ba5",
+            "d1a533f4-8657-480a-b8ed-5a928e7d0c4c",
+            "2f8cedfe-2b6c-4dd2-b244-6e024dc5164d",
+            "2253294a-7801-4f95-ae69-3b60c9ea5595",
+            "c8425fd0-f20f-4549-9d31-6ba4c9ee8187",
+            "2a417adc-7e6f-4a49-ac1d-99a0aac75578",
+            "57579658-03ec-4ecd-aff7-9c6e89f205fa",
+            "b0bb66eb-f8b1-4831-b65c-d69771c38ce4",
+            "e41e1a84-2bb8-463c-af90-02a7b779b175",
+            "6c57597a-7bde-47b6-89a2-fcdd5fdea11f",
+            "5d904949-9d17-4cfd-8f07-252f84d9dea6",
+            "c36cbc5f-f8e9-4b3f-a454-2b5ec41eb5d6",
+            "bf3d1c46-698c-4ca0-8144-74ae15664beb",
+            "acea9f4c-7395-4f43-9e76-e5b4c9b4abac",
+            "e5896d34-27b7-4c5b-868c-f412230d89f9",
+            "20f4638b-6279-4ce1-b12a-5fd037bc8da3",
+            "55d146ef-b105-4e30-8734-0b3c801bb083",
+            "c49cc886-d5f6-4957-8c1f-514a3be5618a",
+            "61f74cfe-2ec9-4e33-9d75-326d3badb05b"
+          ],
+          "dry_run": true
+        }
+      },
+      "expected_status": 200,
+      "elapsed_ms": 18.2,
+      "result": "PASS"
+    },
+    {
+      "description": "Run matching for specific zone (dry run)",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/match",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": {
+          "zone_id": "8aa31a74-d2c0-41e0-9003-42b6ece6a12b",
+          "dry_run": true
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 200,
+        "body": {
+          "assignments": [],
+          "total_matched": 0,
+          "unmatched_needs": [],
+          "dry_run": true
+        }
+      },
+      "expected_status": 200,
+      "elapsed_ms": 6.1,
+      "result": "PASS"
+    },
+    {
+      "description": "Run matching algorithm (real, creates assignments)",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/match",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": {
+          "zone_id": "8aa31a74-d2c0-41e0-9003-42b6ece6a12b",
+          "dry_run": false
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 200,
+        "body": {
+          "assignments": [],
+          "total_matched": 0,
+          "unmatched_needs": [],
+          "dry_run": false
+        }
+      },
+      "expected_status": 200,
+      "elapsed_ms": 3.9,
+      "result": "PASS"
+    },
+    {
+      "description": "Match without auth \u2014 expect 403",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/match",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "dry_run": true
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 403,
+        "body": {
+          "detail": "Not authenticated"
+        }
+      },
+      "expected_status": 403,
+      "elapsed_ms": 2.2,
+      "result": "PASS"
+    },
+    {
+      "description": "List all assignments",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/tasks",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": null,
+        "params": null
+      },
+      "response": {
+        "status_code": 200,
+        "body": []
+      },
+      "expected_status": 200,
+      "elapsed_ms": 3.9,
+      "result": "PASS"
+    },
+    {
+      "description": "Get non-existent assignment \u2014 expect 404",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/tasks/00000000-0000-0000-0000-000000000000",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": null,
+        "params": null
+      },
+      "response": {
+        "status_code": 404,
+        "body": {
+          "detail": "Endpoint not found"
+        }
+      },
+      "expected_status": 404,
+      "elapsed_ms": 4.2,
+      "result": "PASS"
+    },
+    {
+      "description": "Ingest a need via REST API (no auth required)",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/ingest",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "title": "INGEST TEST: Stranded family needs rescue",
+          "description": "Family of 4 stranded on rooftop due to flooding",
+          "category": "rescue",
+          "urgency": "critical",
+          "zone_id": "ac73ccbf-c996-4c2a-aef9-2dd965115727",
+          "requester_name": "Ingest Test Person",
+          "requester_phone": "+919555000123",
+          "skills_required": [
+            "search_rescue",
+            "first_aid"
+          ],
+          "people_count": 4,
+          "source": "api"
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 500,
+        "body": {
+          "detail": "Internal server error"
+        }
+      },
+      "expected_status": 201,
+      "elapsed_ms": 9.1,
+      "result": "FAIL"
+    },
+    {
+      "description": "WhatsApp verification challenge",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/ingest/whatsapp",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": null,
+        "params": {
+          "hub.mode": "subscribe",
+          "hub.verify_token": "your_whatsapp_verify_token",
+          "hub.challenge": "CHALLENGE_CODE_12345"
+        }
+      },
+      "response": {
+        "status_code": 200,
+        "body": "CHALLENGE_CODE_12345"
+      },
+      "expected_status": 200,
+      "elapsed_ms": 1.9,
+      "result": "PASS"
+    },
+    {
+      "description": "WhatsApp webhook \u2014 incoming message",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/ingest/whatsapp",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "object": "whatsapp_business_account",
+          "entry": [
+            {
+              "id": "WHATSAPP_BUSINESS_ACCOUNT_ID",
+              "changes": [
+                {
+                  "value": {
+                    "messaging_product": "whatsapp",
+                    "metadata": {
+                      "display_phone_number": "1234567890",
+                      "phone_number_id": "PH_ID"
+                    },
+                    "messages": [
+                      {
+                        "from": "+919876500001",
+                        "id": "wamid.test123",
+                        "timestamp": "1777397204",
+                        "text": {
+                          "body": "Need urgent help, 3 people trapped in flood water near north bank"
+                        },
+                        "type": "text"
+                      }
+                    ]
+                  },
+                  "field": "messages"
+                }
+              ]
+            }
+          ]
+        },
+        "params": null
+      },
+      "response": {
+        "status_code": 200,
+        "body": {
+          "status": "ok",
+          "ingested": 0
+        }
+      },
+      "expected_status": 200,
+      "elapsed_ms": 4.5,
+      "result": "PASS"
+    },
+    {
+      "description": "Need with invalid UUID format \u2014 expect 422 or 404",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/needs/not-a-uuid",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": null,
+        "params": null
+      },
+      "response": {
+        "status_code": 422,
+        "body": {
+          "detail": [
+            {
+              "type": "uuid_parsing",
+              "loc": [
+                "path",
+                "need_id"
+              ],
+              "msg": "Input should be a valid UUID, invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1",
+              "input": "not-a-uuid",
+              "ctx": {
+                "error": "invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1"
+              }
+            }
+          ]
+        }
+      },
+      "expected_status": 422,
+      "elapsed_ms": 2.5,
+      "result": "PASS"
+    },
+    {
+      "description": "Invalid pagination params \u2014 expect 422",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/needs",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": null,
+        "params": {
+          "page": -1,
+          "page_size": 999
+        }
+      },
+      "response": {
+        "status_code": 422,
+        "body": {
+          "detail": [
+            {
+              "type": "greater_than_equal",
+              "loc": [
+                "query",
+                "page"
+              ],
+              "msg": "Input should be greater than or equal to 1",
+              "input": "-1",
+              "ctx": {
+                "ge": 1
+              }
+            },
+            {
+              "type": "less_than_equal",
+              "loc": [
+                "query",
+                "page_size"
+              ],
+              "msg": "Input should be less than or equal to 100",
+              "input": "999",
+              "ctx": {
+                "le": 100
+              }
+            }
+          ]
+        }
+      },
+      "expected_status": 422,
+      "elapsed_ms": 7.0,
+      "result": "PASS"
+    },
+    {
+      "description": "Create need with string body \u2014 expect 422",
+      "method": "POST",
+      "url": "http://localhost:8000/api/v1/needs",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ***"
+        },
+        "body": "this is not json",
+        "params": null
+      },
+      "response": {
+        "status_code": 422,
+        "body": {
+          "detail": [
+            {
+              "type": "model_attributes_type",
+              "loc": [
+                "body"
+              ],
+              "msg": "Input should be a valid dictionary or object to extract fields from",
+              "input": "this is not json"
+            }
+          ]
+        }
+      },
+      "expected_status": 422,
+      "elapsed_ms": 2.6,
+      "result": "PASS"
+    },
+    {
+      "description": "Non-existent route \u2014 expect 404",
+      "method": "GET",
+      "url": "http://localhost:8000/api/v1/nonexistent_route",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": null,
+        "params": null
+      },
+      "response": {
+        "status_code": 404,
+        "body": {
+          "detail": "Endpoint not found"
+        }
+      },
+      "expected_status": 404,
+      "elapsed_ms": 1.4,
+      "result": "PASS"
+    }
+  ]
+}
