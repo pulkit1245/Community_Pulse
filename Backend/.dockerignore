@@ -1,5 +1,6 @@
 # Python cache
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 *.pyc
@@ -9,6 +10,9 @@ __pycache__/
 venv/
 .venv/
 env/
+**/venv/
+**/.venv/
+**/env/
 
 # Environment files (injected by Railway — never bake secrets into image)
 .env
@@ -18,6 +22,7 @@ env/
 # Tests and dev tools
 tests/
 .pytest_cache/
+**/.pytest_cache/
 pytest.ini
 .coverage
 htmlcov/

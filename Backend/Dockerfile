@@ -13,14 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy and install Python dependencies into a clean prefix
 COPY requirements.txt requirements.docker.txt ./
 RUN pip install --upgrade pip "setuptools<70.0.0" wheel \
-    && pip install --prefix=/install --no-cache-dir \
-      --extra-index-url https://download.pytorch.org/whl/cpu \
-      -r requirements.docker.txt \
-    && pip install --prefix=/install --no-cache-dir \
-      --extra-index-url https://download.pytorch.org/whl/cpu \
-      torch==2.3.1+cpu \
-    && pip install --prefix=/install --no-cache-dir --no-build-isolation --no-deps \
-      openai-whisper==20231117
+    && pip install --prefix=/install --no-cache-dir -r requirements.docker.txt
 
 
 # ─── Stage 2: Runtime ────────────────────────────────────────────────────────
@@ -28,11 +21,10 @@ FROM python:3.11-slim AS runtime
 
 WORKDIR /app
 
-# Runtime system deps (libpq for asyncpg, tesseract for OCR, ffmpeg for Whisper audio)
+# Runtime system deps (libpq for asyncpg, tesseract for OCR)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     tesseract-ocr \
-    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy installed packages from builder
