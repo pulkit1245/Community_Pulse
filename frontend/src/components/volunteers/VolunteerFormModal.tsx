@@ -16,9 +16,9 @@ interface VolunteerFormModalProps {
   open: boolean;
   volunteer?: Volunteer | null; // null = create mode
   onClose: () => void;
-  onCreate: (p: CreateVolunteerPayload) => Promise<void>;
-  onUpdate: (id: string, p: Partial<CreateVolunteerPayload>) => Promise<void>;
-  onDelete?: (id: string) => Promise<void>;
+  onCreate: (p: CreateVolunteerPayload) => Promise<any>;
+  onUpdate: (id: string, p: Partial<CreateVolunteerPayload>) => Promise<any>;
+  onDelete?: (id: string) => Promise<any>;
 }
 
 const ALL_SKILLS: { value: SkillType; label: string }[] = [

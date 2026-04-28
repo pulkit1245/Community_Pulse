@@ -7,7 +7,7 @@
 
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+
 
 // Routes that require authentication
 const PROTECTED_PREFIXES = [
@@ -23,7 +23,7 @@ const PROTECTED_PREFIXES = [
 // Routes that should redirect authenticated users away (e.g. login)
 const AUTH_ROUTES = ["/login"];
 
-export default auth((req: NextRequest & { auth: Awaited<ReturnType<typeof auth>> }) => {
+export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth;
 

@@ -15,7 +15,7 @@ import type { NeedType } from "@/types/api.types";
 interface IngestModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (payload: { description: string; zone?: string; type?: string }) => Promise<void>;
+  onSubmit: (payload: { description: string; zone?: string; type?: string }) => Promise<any>;
 }
 
 type Mode = "freetext" | "structured";
