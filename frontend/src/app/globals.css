@@ -1,0 +1,128 @@
+/* ─────────────────────────────────────────────────────────────
+   styles/globals.css
+   Tailwind directives + design system CSS variables
+───────────────────────────────────────────────────────────── */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens ─────────────────────────────────────────── */
+
+@layer base {
+  :root {
+    /* Backgrounds */
+    --bg-primary:   #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary:  #f1f5f9;
+    --bg-surface:   #ffffff;
+
+    /* Text */
+    --text-primary:   #0f172a;
+    --text-secondary: #475569;
+    --text-muted:     #94a3b8;
+
+    /* Border */
+    --border-default: #e2e8f0;
+    --border-strong:  #cbd5e1;
+
+    /* Brand */
+    --brand-primary:  #0ea5e9;
+    --brand-hover:    #38bdf8;
+
+    /* Urgency palette */
+    --urgency-critical: #ef4444;
+    --urgency-moderate: #f59e0b;
+    --urgency-low:      #22c55e;
+
+    /* Sidebar */
+    --sidebar-bg:   #0f172a;
+    --sidebar-text: #94a3b8;
+    --sidebar-active: #38bdf8;
+
+    color-scheme: light;
+  }
+
+  .dark {
+    --bg-primary:   #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary:  #162032;
+    --bg-surface:   #1e293b;
+
+    --text-primary:   #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted:     #475569;
+
+    --border-default: #1e293b;
+    --border-strong:  #334155;
+
+    color-scheme: dark;
+  }
+
+  /* ── Base resets ───────────────────────────────────────────── */
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-family: var(--font-sans, 'DM Sans', system-ui, sans-serif);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── Scrollbar ─────────────────────────────────────────────── */
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 99px;
+  }
+
+  /* ── Focus ring ────────────────────────────────────────────── */
+
+  :focus-visible {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* ── Utility classes ───────────────────────────────────────── */
+
+@layer utilities {
+  .font-mono { font-family: var(--font-mono, 'DM Mono', monospace); }
+  .font-serif { font-family: var(--font-serif, 'Playfair Display', serif); }
+
+  /* Urgency color helpers */
+  .urgency-critical { color: var(--urgency-critical); }
+  .urgency-moderate { color: var(--urgency-moderate); }
+  .urgency-low      { color: var(--urgency-low); }
+
+  /* Page transition wrapper */
+  .page-enter {
+    animation: page-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes page-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
