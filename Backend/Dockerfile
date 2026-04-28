@@ -19,7 +19,7 @@ RUN pip install --upgrade pip "setuptools<70.0.0" wheel \
     && pip install --prefix=/install --no-cache-dir \
       --extra-index-url https://download.pytorch.org/whl/cpu \
       torch==2.3.1+cpu \
-    && pip install --prefix=/install --no-cache-dir --no-build-isolation \
+    && pip install --prefix=/install --no-cache-dir --no-build-isolation --no-deps \
       openai-whisper==20231117
 
 
