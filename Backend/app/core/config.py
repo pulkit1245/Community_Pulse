@@ -13,9 +13,21 @@ class Settings(BaseSettings):
 
     # Database
     # Railway provides DATABASE_URL automatically when you attach a Postgres service.
-    # asyncpg driver requires the postgresql+asyncpg:// scheme.
     database_url: str = "postgresql+asyncpg://postgres:password@localhost:5432/disaster_relief"
-    sync_database_url: str = "postgresql://postgres:password@localhost:5432/disaster_relief"
+
+    @property
+    def sync_database_url(self) -> str:
+        # Alembic needs a sync URL (removes asyncpg if present)
+        url = self.database_url.replace("postgres://", "postgresql://")
+        return url.replace("+asyncpg", "")
+
+    @property
+    def async_database_url(self) -> str:
+        # asyncpg requires the +asyncpg scheme, Railway provides standard postgresql://
+        url = self.database_url.replace("postgres://", "postgresql://")
+        if url.startswith("postgresql://"):
+            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return url
 
     # Security
     secret_key: str = "change-me-in-production"
