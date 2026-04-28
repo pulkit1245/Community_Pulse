@@ -17,12 +17,9 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy and install Python dependencies into the venv
-COPY requirements.txt requirements.docker.txt ./
+COPY requirements.api.txt ./
 RUN pip install --upgrade pip "setuptools<70.0.0" wheel \
-    && pip install --no-cache-dir -r requirements.docker.txt
-
-# Download spaCy model directly into the venv during the build stage
-RUN pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+    && pip install --no-cache-dir -r requirements.api.txt
 
 
 # ─── Stage 2: Runtime ────────────────────────────────────────────────────────
@@ -30,10 +27,9 @@ FROM python:3.11-slim AS runtime
 
 WORKDIR /app
 
-# Runtime system deps (libpq for asyncpg, tesseract for OCR)
+# Runtime system deps (libpq for asyncpg)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
-    tesseract-ocr \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the entire configured venv from the builder
@@ -49,6 +45,7 @@ COPY . .
 ENV PORT=8000
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV ENABLE_ML_ROUTES=false
 
 # Non-root user for security
 RUN useradd -m -u 1001 appuser && chown -R appuser:appuser /app

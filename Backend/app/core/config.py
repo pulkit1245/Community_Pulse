@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     app_name: str = "Disaster Relief Backend"
     app_env: str = "development"
     debug: bool = True
+    enable_ml_routes: bool = False
 
     # Server — Railway injects $PORT automatically
     port: int = 8000
