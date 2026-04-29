@@ -46,7 +46,7 @@ docs/
 *.html
 
 # Seed scripts (not needed in production image)
-seed/
+# seed/
 
 # Alembic pycache
 migrations/__pycache__/
