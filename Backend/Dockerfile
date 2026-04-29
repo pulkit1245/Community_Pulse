@@ -41,23 +41,23 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Copy application source
 COPY . .
 
-# Railway injects PORT at runtime; default 8000 for local docker run
+# Copy and make entrypoint executable (done as root before user switch)
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Runtime env
 ENV PORT=8000
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV ENABLE_ML_ROUTES=false
 
 # Non-root user for security
-RUN useradd -m -u 1001 appuser && chown -R appuser:appuser /app
+RUN useradd -m -u 1001 appuser && chown -R appuser:appuser /app /entrypoint.sh
 USER appuser
 
-# Health check — Increased start-period to 60s to allow NLP model and DB to load
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${PORT}/health')" || exit 1
 
-# Start: run migrations first, then start the API server
-# Reduced to 1 worker to prevent database deadlocks during initialization
-CMD bash -c "alembic upgrade head && \
-python -m seed.seed_base || echo 'seed_base failed' && \
-python -m seed.seed_demo || echo 'seed_demo failed' && \
-uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1 --log-level info"
+# Start: migrations → seeding → uvicorn
+CMD ["/entrypoint.sh"]
