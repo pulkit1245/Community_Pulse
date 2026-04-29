@@ -15,7 +15,6 @@ pydantic-settings==2.2.1
 
 # ─── Auth & Security ─────────────────────────────────────────
 python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
 python-multipart==0.0.9
 
 # ─── HTTP Client ─────────────────────────────────────────────
@@ -51,3 +50,8 @@ torch==2.3.1 ; sys_platform == 'darwin'
 torch==2.3.1+cpu ; sys_platform == 'linux'
 torchaudio==2.3.1 ; sys_platform == 'darwin'
 torchaudio==2.3.1+cpu ; sys_platform == 'linux'
+
+
+
+bcrypt==4.0.1
+passlib[bcrypt]==1.7.4
