@@ -58,6 +58,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # Start: run migrations first, then start the API server
 # Reduced to 1 worker to prevent database deadlocks during initialization
 CMD alembic upgrade head && \
+    python -m seed.seed_base && \
+    python -m seed.seed_demo && \
     uvicorn main:app \
       --host 0.0.0.0 \
       --port $PORT \
