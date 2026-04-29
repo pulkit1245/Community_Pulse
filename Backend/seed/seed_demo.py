@@ -18,6 +18,7 @@ from sqlalchemy import select
 
 async def run_demo_seed():
     engine = create_async_engine(settings.async_database_url, echo=False)
+    print("ASYNC DB URL:", settings.async_database_url)
     Session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with Session() as db:
