@@ -25,5 +25,4 @@ services:
 databases:
   - name: disaster-relief-db
     databaseName: disaster_relief
-    user: postgres
     plan: free
