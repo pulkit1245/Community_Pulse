@@ -8,7 +8,10 @@ Run: python -m seed.seed_demo
 import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from app.core.config import settings
-from app.core.security import get_password_hash
+import bcrypt
+
+def _hash(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 from app.models.zone import Zone
 from app.models.volunteer import Volunteer
 from app.models.need import Need, UrgencyLevel
@@ -53,11 +56,11 @@ async def run_demo_seed():
 
         # Demo volunteers with matching skills
         demo_volunteers = [
-            Volunteer(name="[DEMO] Dr. Arjun Rescue",   phone="+919900000001", skills=["search_rescue","first_aid"],   zone_id=z1.id, hashed_password=get_password_hash("demo123"), role="coordinator"),
-            Volunteer(name="[DEMO] Nurse Priti Medical", phone="+919900000002", skills=["medical","first_aid"],        zone_id=z2.id, hashed_password=get_password_hash("demo123"), role="volunteer"),
-            Volunteer(name="[DEMO] Chef Ramesh Food",   phone="+919900000003", skills=["cooking","logistics"],        zone_id=z3.id, hashed_password=get_password_hash("demo123"), role="volunteer"),
-            Volunteer(name="[DEMO] Driver Kamla",       phone="+919900000004", skills=["driving","logistics"],        zone_id=z1.id, hashed_password=get_password_hash("demo123"), role="volunteer"),
-            Volunteer(name="[DEMO] Counselor Meera",    phone="+919900000005", skills=["counseling","communication"], zone_id=z3.id, hashed_password=get_password_hash("demo123"), role="volunteer"),
+            Volunteer(name="[DEMO] Dr. Arjun Rescue",   phone="+919900000001", skills=["search_rescue","first_aid"],   zone_id=z1.id, hashed_password=_hash("demo123"), role="coordinator", email="arjun@demo.com"),
+            Volunteer(name="[DEMO] Nurse Priti Medical", phone="+919900000002", skills=["medical","first_aid"],        zone_id=z2.id, hashed_password=_hash("demo123"), role="volunteer", email="priti@demo.com"),
+            Volunteer(name="[DEMO] Chef Ramesh Food",   phone="+919900000003", skills=["cooking","logistics"],        zone_id=z3.id, hashed_password=_hash("demo123"), role="volunteer", email="ramesh@demo.com"),
+            Volunteer(name="[DEMO] Driver Kamla",       phone="+919900000004", skills=["driving","logistics"],        zone_id=z1.id, hashed_password=_hash("demo123"), role="volunteer", email="kamla@demo.com"),
+            Volunteer(name="[DEMO] Counselor Meera",    phone="+919900000005", skills=["counseling","communication"], zone_id=z3.id, hashed_password=_hash("demo123"), role="volunteer", email="meera@demo.com"),
         ]
 
         for n in flood_needs + medical_needs + food_needs:

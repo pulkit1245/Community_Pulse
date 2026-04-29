@@ -9,7 +9,10 @@ import asyncio
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from app.core.config import settings
-from app.core.security import get_password_hash
+import bcrypt
+
+def _hash(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 from app.models.zone import Zone
 from app.models.volunteer import Volunteer
 from app.models.need import Need, UrgencyLevel, NeedStatus
@@ -71,7 +74,7 @@ async def run_seed():
                 email=f"volunteer{i}@relief.org",
                 skills=skills,
                 zone_id=zones[i % len(zones)].id,
-                hashed_password=get_password_hash("password123"),
+                hashed_password=_hash("password123"),
                 role="coordinator" if i < 2 else "volunteer",
                 languages=["hindi", "english"] if i % 2 == 0 else ["hindi"],
             )
