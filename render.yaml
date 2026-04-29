@@ -6,6 +6,7 @@ services:
     plan: free
     rootDir: Backend
     dockerfilePath: ./Dockerfile
+    startCommand: "bash -c 'alembic upgrade head && python -m seed.seed_base && python -m seed.seed_demo && uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1 --log-level info'"
     envVars:
       - key: APP_ENV
         value: production
