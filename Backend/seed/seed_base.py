@@ -46,7 +46,7 @@ VOLUNTEER_NAMES = [
 
 
 async def run_seed():
-    engine = create_async_engine(settings.database_url, echo=False)
+    engine = create_async_engine(settings.async_database_url, echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
